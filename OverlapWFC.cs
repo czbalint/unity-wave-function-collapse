@@ -61,6 +61,7 @@ class OverlapWFC : MonoBehaviour{
 
 	void Start(){
 		Generate();
+		Run();
 	}
 
 	void Update(){
@@ -98,6 +99,7 @@ class OverlapWFC : MonoBehaviour{
         rendering = new GameObject[width, depth];
 		model = new OverlappingModel(training.sample, N, width, depth, periodicInput, periodicOutput, symmetry, foundation);
         undrawn = true;
+        
     }
 
 	void OnDrawGizmos(){
@@ -123,23 +125,41 @@ class OverlapWFC : MonoBehaviour{
 		if (output == null){return;}
 		if (group == null){return;}
         undrawn = false;
+        var baseCount = 0;
+        var absY = -1;
+	    var prevY = 0;
+        
 		try{
 			for (int y = 0; y < depth; y++){
+				var lvlCheck = false; 
 				for (int x = 0; x < width; x++){
 					if (rendering[x,y] == null){
 						int v = (int)model.Sample(x, y);
 						if (v != 99 && v < training.tiles.Length){
-							Vector3 pos = new Vector3(x*gridsize, y*gridsize, 0f);
 							int rot = (int)training.RS[v];
 							GameObject fab = training.tiles[v] as GameObject;
+							
 							if (fab != null){
-								GameObject tile = (GameObject)Instantiate(fab, new Vector3() , Quaternion.identity);
-								Vector3 fscale = tile.transform.localScale;
-								tile.transform.parent = group;
-								tile.transform.localPosition = pos;
-								tile.transform.localEulerAngles = new Vector3(0, 0, 360 - (rot * 90));
-								tile.transform.localScale = fscale;
-								rendering[x,y] = tile;
+								if (fab.name.Equals("Rock") && !lvlCheck){
+									baseCount++;
+									lvlCheck = true;
+									print(baseCount);
+								}
+								if (baseCount == 2){
+									if (y != prevY){
+										absY++;
+										prevY = y;
+									}
+									GameObject tile = (GameObject) Instantiate(fab, new Vector3(), Quaternion.identity);
+									Vector3 fscale = tile.transform.localScale;
+									tile.transform.parent = group;
+									Vector3 pos = new Vector3(x*gridsize, absY*gridsize, 0f);
+									tile.transform.localPosition = pos;
+									tile.transform.localEulerAngles = new Vector3(0, 0, 360 - (rot * 90));
+									tile.transform.localScale = fscale;
+									rendering[x, y] = tile;
+								}
+								if (baseCount > 2) return;
 							}
 						} else
                         {
@@ -152,7 +172,10 @@ class OverlapWFC : MonoBehaviour{
 	  		model = null;
 	  		return;
 	  	}
+
+		int aa;
 	}
+	
 }
 
  #if UNITY_EDITOR
@@ -163,10 +186,13 @@ public class WFCGeneratorEditor : Editor {
 		if (generator.training != null){
 			if(GUILayout.Button("generate")){
 				generator.Generate();
+				generator.Run();
+				int sss;
 			}
 			if (generator.model != null){
 				if(GUILayout.Button("RUN")){
 					generator.Run();
+					int sss;
 				}
 			}
 		}

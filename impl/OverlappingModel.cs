@@ -8,6 +8,7 @@ The software is provided "as is", without warranty of any kind, express or impli
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 class OverlappingModel : Model
@@ -29,19 +30,14 @@ class OverlappingModel : Model
 
 		colors = new List<byte>();
 		colors.Add((byte)0);
-		for (int y = 0; y < SMY; y++) for (int x = 0; x < SMX; x++)
-			{
-				byte color = sample[x, y];
+		for (var y = 0; y < SMY; y++) for (var x = 0; x < SMX; x++)
+		{
+			byte color = sample[x, y];
 
-				int i = 0;
-				foreach (var c in colors)
-				{
-					if (c == color) break;
-					i++;
-				}
+			int i = colors.TakeWhile(c => c != color).Count();
 
-				if (i == colors.Count) colors.Add(color);
-			}
+			if (i == colors.Count) colors.Add(color);
+		}
 
 		int C = colors.Count;
 		long W = Stuff.Power(C, N * N);

@@ -53,7 +53,7 @@ public abstract class Model
 		sumOfWeights = 0;
 		sumOfWeightLogWeights = 0;
 
-		for (int t = 0; t < T; t++)
+		for (var t = 0; t < T; t++)
 		{
 			weightLogWeights[t] = weights[t] * Math.Log(weights[t]);
 			sumOfWeights += weights[t];
@@ -75,17 +75,17 @@ public abstract class Model
 
 	bool? Observe()
 	{
-		double min = 1E+3;
-		int argmin = -1;
+		var min = 1E+3;
+		var argmin = -1;
 
-		for (int i = 0; i < wave.Length; i++)
+		for (var i = 0; i < wave.Length; i++)
 		{
 			if (OnBoundary(i % FMX, i / FMX)) continue;
 
-			int amount = sumsOfOnes[i];
+			var amount = sumsOfOnes[i];
 			if (amount == 0) return false;
 
-			double entropy = entropies[i];
+			var entropy = entropies[i];
 			if (amount > 1 && entropy <= min)
 			{
 				double noise = 1E-6 * random.NextDouble();
